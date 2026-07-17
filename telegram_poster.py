@@ -44,8 +44,8 @@ TARGET_GROUPS = [
     "بيع وشراء انستا يدوي فقط",
 ]
 
-MESSAGE = (
-    "<b>💙🚀 كل خدمات الويب والسوشيال ميديا هتلاقيها هنا 🚀💙</b>\n\n"
+MESSAGE_1 = (
+    "<b>💙🚀 خدمات الويب المتكاملة 🚀💙</b>\n\n"
     "<b>🌐 تصميم مواقع احترافية</b>\n\n"
     "▫️<b>لاند بيدج (Landing Page)</b>\nتصميم صفحة جذابة لعرض منتج أو خدمة وتحويل الزوار لعملاء\n\n"
     "▫️<b>متجر إلكتروني (E-commerce)</b>\nتصميم متجر متكامل لمنتجاتك (أحذية، ملابس، إكسسوارات... إلخ) من الصفر\n\n"
@@ -62,7 +62,12 @@ MESSAGE = (
     "<b>📍 خدمات تانية</b>\n"
     "▫️<b>إضافة موقعك على لوكيشن جوجل</b>\nبالاسم اللي تحبه عشان عملاؤك يلاقوك بسهولة\n\n"
     "▫️<b>تصميم هوية بصرية</b>\nلوجو + كروت شخصية + بروشور احترافي لبيزنسك\n\n"
-    "━━━━━━━━━━━━━━\n\n"
+    "👀 مش لاقي اللي محتاجه؟ اسأل عليه وهظبطهولك\n\n"
+    "<b>📲 كاش:</b>\n01102394162"
+)
+
+MESSAGE_2 = (
+    "<b>💙🚀 خدمات السوشيال ميديا 🚀💙</b>\n\n"
     "<b>✨ خدمات السوشيال ميديا ✨</b>\n\n"
     "👥 متابعين فيسبوك\n↳ أول 100 متابع = 3 جنيه 💸\n\n"
     "💬 لايكات وتعليقات\n↳ أول 100 تعليق = 30 جنيه 🔥\n\n"
@@ -78,9 +83,10 @@ MESSAGE = (
     "📰 نشر أخبار في جرائد\n"
     "🚀 خدمات تانية كتير...\n\n"
     "👀 مش لاقي اللي محتاجه؟ اسأل عليه وهظبطهولك\n\n"
-    "━━━━━━━━━━━━━━\n\n"
     "<b>📲 كاش:</b>\n01102394162"
 )
+
+MESSAGES = [MESSAGE_1, MESSAGE_2]
 
 client = TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH)
 
@@ -94,7 +100,7 @@ def is_target(name):
     return False
 
 
-async def send_to_all():
+async def send_to_all(message):
     success = 0
     failed = 0
     async for dialog in client.iter_dialogs():
@@ -105,7 +111,7 @@ async def send_to_all():
         try:
             await client.send_message(
                 dialog.entity,
-                "<blockquote>" + MESSAGE + "</blockquote>",
+                "<blockquote>" + message + "</blockquote>",
                 parse_mode="html"
             )
             print("تم: " + dialog.name)
@@ -121,9 +127,15 @@ async def send_to_all():
 async def main():
     await client.connect()
     print("اتصلنا بتلجرام!")
+    index = 0
     while True:
-        await send_to_all()
+        message = MESSAGES[index % len(MESSAGES)]
+        print("هنبعت البوست رقم " + str((index % len(MESSAGES)) + 1))
+        await send_to_all(message)
+        index += 1
         await asyncio.sleep(HOURS * 60 * 60)
 
 
 asyncio.run(main())
+
+    
