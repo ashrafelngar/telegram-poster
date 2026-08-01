@@ -36,7 +36,7 @@ TARGET_GROUPS = [
     "Social mony💰",
     "(القراصنة)",
     "أسود المجال 🦁💰",
-    "sonaa el magal | صناع المجال",
+    "💰 Money Makers صناع المال",
     "حيتان الميديا 🔥🐺",
     "𝐒𝐄𝐋𝐋𝐄𝐑𝐒 𝐇𝐔𝐁 ☠️💸",
     "Social Madia Marketing",
