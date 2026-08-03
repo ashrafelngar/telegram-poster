@@ -7,7 +7,10 @@ from telethon.tl.types import Channel, Chat
 API_ID = 28324761
 API_HASH = "9c0162ea1486f6fce31813f51ef9af07"
 SESSION_STRING = os.environ.get("SESSION_STRING", "")
-HOURS = 1
+
+# تحديد أوقات النشر (بالساعات)
+HOURS_MESSAGE_1 = 1  # الرسالة الأولى كل 1 ساعة
+HOURS_MESSAGE_2 = 3  # الرسالة الثانية كل 3 ساعات
 
 TARGET_GROUPS = [
     "خدمات سوشيال ميديا",
@@ -32,7 +35,7 @@ TARGET_GROUPS = [
     "NoOor Elzeny 🌹",
     "ماركت ميديا ..🥇",
     "محترفين المجال",
-    "𝕂𝕚𝕟𝕘𝕤 𝕄𝕖𝕥𝕙𝕠𝕕𝕤 👑 ملوك التسويق",
+    "𝕂𝕚𝕟gings 𝕄𝕖𝕥𝕙𝕠𝕕𝕤 👑 ملوك التسويق",
     "Social mony💰",
     "(القراصنة)",
     "أسود المجال 🦁💰",
@@ -44,7 +47,7 @@ TARGET_GROUPS = [
     "بيع وشراء انستا يدوي فقط",
 ]
 
-MESSAGE_3 = (
+MESSAGE_1 = (
     "<b>💙🚀 خدمات السوشيال ميديا 🚀💙</b>\n\n"
     "👥 متابعين فيسبوك\n↳ أول 100 متابع = 3 جنيه 💸\n"
     "💬 لايكات وتعليقات\n↳ أول 100 تعليق = 30 جنيه 🔥\n"
@@ -63,7 +66,14 @@ MESSAGE_3 = (
     "<b>📲 كاش:</b> 01102394162"
 )
 
-MESSAGES = [MESSAGE_3]
+MESSAGE_2 = (
+    "موجود كروت باي بيت Bybit فريش 🔥\n\n"
+    "متوفر فيزا 30 جنيه ✅\n"
+    "متوفر مستر 40 جنيه ✅\n\n"
+    "الفيزا بتطلع ليك فريش بدقيقة ❤️\n"
+    "وصلاحية 24 ساعة كاملين 🔥\n\n"
+    "<b>📲 للتواصل كاش:</b> 01102394162"
+)
 
 client = TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH)
 
@@ -77,7 +87,7 @@ def is_target(name):
     return False
 
 
-async def send_to_all(message):
+async def send_to_all(message, msg_name):
     success = 0
     failed = 0
     async for dialog in client.iter_dialogs():
@@ -91,26 +101,43 @@ async def send_to_all(message):
                 "<blockquote>" + message + "</blockquote>",
                 parse_mode="html"
             )
-            print("تم: " + dialog.name)
+            print(f"[{msg_name}] تم النشر في: {dialog.name}")
             success += 1
             await asyncio.sleep(3)
         except Exception as e:
-            print("فشل: " + dialog.name + " | " + str(e))
+            print(f"[{msg_name}] فشل في: {dialog.name} | {e}")
             failed += 1
-    print(str(success) + " نجح | " + str(failed) + " فشل")
-    print("هنبعت تاني بعد " + str(HOURS) + " ساعة")
+    print(f"--- [{msg_name}] النتيجة: {success} نجح | {failed} فشل ---")
+
+
+# مهمة الرسالة الأولى (كل ساعة)
+async def task_message_1():
+    while True:
+        print("🚀 بدء إرسال الرسالة الأولى (خدمات السوشيال)...")
+        await send_to_all(MESSAGE_1, "الرسالة الأولى")
+        print(f"سيتكرر إرسال الرسالة الأولى بعد {HOURS_MESSAGE_1} ساعة.")
+        await asyncio.sleep(HOURS_MESSAGE_1 * 3600)
+
+
+# مهمة الرسالة الثانية (كل 3 ساعات)
+async def task_message_2():
+    while True:
+        print("💳 بدء إرسال الرسالة الثانية (كروت باي بيت)...")
+        await send_to_all(MESSAGE_2, "الرسالة الثانية")
+        print(f"سيتكرر إرسال الرسالة الثانية بعد {HOURS_MESSAGE_2} ساعات.")
+        await asyncio.sleep(HOURS_MESSAGE_2 * 3600)
 
 
 async def main():
     await client.connect()
-    print("اتصلنا بتلجرام!")
-    index = 0
-    while True:
-        message = MESSAGES[index % len(MESSAGES)]
-        print("هنبعت البوست رقم " + str((index % len(MESSAGES)) + 1))
-        await send_to_all(message)
-        index += 1
-        await asyncio.sleep(HOURS * 60 * 60)
+    print("اتصلنا بتلجرام بنجاح!")
+    
+    # تشغيل المهام في الخلفية بشكل مستقل بدون أن تتعارض مع بعضها
+    asyncio.create_task(task_message_1())
+    asyncio.create_task(task_message_2())
+    
+    # الإبقاء على البوت يعمل بشكل مستمر
+    await asyncio.Event().wait()
 
 
 asyncio.run(main())
