@@ -44,6 +44,9 @@ TARGET_GROUPS = [
     "Social Madia Marketing",
     "صناع المآل // Money Makers 🔥",
     "بيع وشراء انستا يدوي فقط",
+    "Mlook Marketing 👑 ملوك ماركتنج", 
+    "𝐒𝐄𝐋𝐋𝐄𝐑𝐒 𝐇𝐔𝐁 ☠️💸", 
+    "𝕂𝕚𝕟𝕘𝕤 𝕄𝕖𝕥𝕙𝕠𝕕𝕤 👑 ملوك التسويق", 
 ]
 
 client = TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH)
