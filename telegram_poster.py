@@ -8,8 +8,8 @@ API_ID = 28324761
 API_HASH = "9c0162ea1486f6fce31813f51ef9af07"
 SESSION_STRING = os.environ.get("SESSION_STRING", "")
 
-HOURS_MESSAGE_1 = 1  # الرسالة الأولى كل 1 ساعة
-HOURS_MESSAGE_2 = 3  # الرسالة الثانية كل 3 ساعات
+HOURS_MESSAGE_1 = 1    # الرسالة الأولى كل 1 ساعة
+HOURS_MESSAGE_2 = 2.5  # الرسالة الثانية كل ساعتين ونصف (2.5 ساعة)
 
 TARGET_GROUPS = [
     "خدمات سوشيال ميديا",
@@ -48,6 +48,7 @@ TARGET_GROUPS = [
 
 client = TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH)
 
+
 def is_target(name):
     if not name:
         return False
@@ -56,8 +57,8 @@ def is_target(name):
             return True
     return False
 
+
 async def forward_or_send_custom(msg_obj, msg_name):
-    """ إرسال الرسالة مع الحفاظ الكامل على Custom Emojis والتنسيق """
     success = 0
     failed = 0
     async for dialog in client.iter_dialogs():
@@ -66,7 +67,6 @@ async def forward_or_send_custom(msg_obj, msg_name):
         if not is_target(dialog.name):
             continue
         try:
-            # إرسال الرسالة بنفس كائنات التنسيق والإيموجيات المتحركة
             await client.send_message(
                 dialog.entity,
                 msg_obj.message,
@@ -80,24 +80,28 @@ async def forward_or_send_custom(msg_obj, msg_name):
             failed += 1
     print(f"--- [{msg_name}] النتيجة: {success} نجح | {failed} فشل ---")
 
+
 async def task_message_1():
     while True:
         print("🚀 جلب الرسالة الأولى من 'الرسائل المحفوظة'...")
-        # يجلب آخر رسالة في الرسائل المحفوظة (Saved Messages)
-        async for msg in client.iter_messages('me', limit=2):
+        async for msg in client.iter_messages('me', limit=5):
             if msg.text and "خدمات السوشيال" in msg.text:
-                await forward_or_send_custom(msg, "الرسالة الأولى (إيموجي متحرك)")
+                await forward_or_send_custom(msg, "الرسالة الأولى")
                 break
-        await asyncio.sleep(HOURS_MESSAGE_1 * 3600)
+        print(f"سيتكرر إرسال الرسالة الأولى بعد {HOURS_MESSAGE_1} ساعة.")
+        await asyncio.sleep(int(HOURS_MESSAGE_1 * 3600))
+
 
 async def task_message_2():
     while True:
         print("💳 جلب الرسالة الثانية من 'الرسائل المحفوظة'...")
-        async for msg in client.iter_messages('me', limit=2):
+        async for msg in client.iter_messages('me', limit=5):
             if msg.text and "كروت باي بيت" in msg.text:
-                await forward_or_send_custom(msg, "الرسالة الثانية (إيموجي متحرك)")
+                await forward_or_send_custom(msg, "الرسالة الثانية")
                 break
-        await asyncio.sleep(HOURS_MESSAGE_2 * 3600)
+        print(f"سيتكرر إرسال الرسالة الثانية بعد {HOURS_MESSAGE_2} ساعة (ساعتين ونصف).")
+        await asyncio.sleep(int(HOURS_MESSAGE_2 * 3600))
+
 
 async def main():
     await client.connect()
@@ -108,4 +112,6 @@ async def main():
     
     await asyncio.Event().wait()
 
+
 asyncio.run(main())
+
