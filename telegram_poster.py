@@ -8,7 +8,9 @@ API_ID = 28324761
 API_HASH = "9c0162ea1486f6fce31813f51ef9af07"
 SESSION_STRING = os.environ.get("SESSION_STRING", "")
 
-HOURS_INTERVAL = 1  # يتم النشر كل 1 ساعة
+# توقيت الإرسال
+HOURS_MESSAGE_1 = 1    # الرسالة الأولى كل 1 ساعة
+HOURS_MESSAGE_2 = 2.5  # الرسالة الثانية كل 2.5 ساعة (ساعتين ونصف)
 
 TARGET_GROUPS = [
     "خدمات سوشيال ميديا",
@@ -57,8 +59,8 @@ def is_target(name):
     return False
 
 
-async def forward_or_send_custom(msg_obj):
-    """إرسال الرسالة مع الحفاظ الكامل على الإيموجيات المتحركة والتنسيق"""
+async def forward_or_send_custom(msg_obj, msg_name):
+    """إرسال الرسالة مع الحفاظ الكامل على Custom Emojis والتنسيق"""
     success = 0
     failed = 0
     async for dialog in client.iter_dialogs():
@@ -72,39 +74,61 @@ async def forward_or_send_custom(msg_obj):
                 msg_obj.message,
                 formatting_entities=msg_obj.entities
             )
-            print(f"تم النشر في: {dialog.name}")
+            print(f"[{msg_name}] تم النشر في: {dialog.name}")
             success += 1
             await asyncio.sleep(3)
         except Exception as e:
-            print(f"فشل في: {dialog.name} | {e}")
+            print(f"[{msg_name}] فشل في: {dialog.name} | {e}")
             failed += 1
-    print(f"--- النتيجة: {success} نجح | {failed} فشل ---")
+    print(f"--- [{msg_name}] النتيجة: {success} نجح | {failed} فشل ---")
 
 
-async def task_send_messages():
+# مهمة الرسالة الأولى: خدمات السوشيال ميديا (كل 1 ساعة)
+async def task_message_1():
     while True:
-        print("🔍 جلب رسالة الاشتراكات من 'الرسائل المحفوظة'...")
+        print("🌐 جلب الرسالة الأولى (خدمات السوشيال) من 'الرسائل المحفوظة'...")
         found = False
-        async for msg in client.iter_messages('me', limit=5):
-            if msg.text and "اشتراكات برامج" in msg.text:
-                await forward_or_send_custom(msg)
+        async for msg in client.iter_messages('me', limit=10):
+            if msg.text and "خدمات السوشيال" in msg.text:
+                await forward_or_send_custom(msg, "الرسالة الأولى (السوشيال)")
                 found = True
                 break
         
         if not found:
-            print("❌ لم يتم العثور على الرسالة في 'الرسائل المحفوظة'! تأكد من إرسالها هناك أولاً.")
+            print("❌ لم يتم العثور على رسالة 'خدمات السوشيال' في الرسائل المحفوظة!")
 
-        print(f"سيتكرر الإرسال بعد {HOURS_INTERVAL} ساعة.")
-        await asyncio.sleep(HOURS_INTERVAL * 3600)
+        print(f"سيتكرر إرسال الرسالة الأولى بعد {HOURS_MESSAGE_1} ساعة.")
+        await asyncio.sleep(int(HOURS_MESSAGE_1 * 3600))
+
+
+# مهمة الرسالة الثانية: اشتراكات البرامج (كل 2.5 ساعة)
+async def task_message_2():
+    while True:
+        print("🔍 جلب الرسالة الثانية (اشتراكات البرامج) من 'الرسائل المحفوظة'...")
+        found = False
+        async for msg in client.iter_messages('me', limit=10):
+            if msg.text and "اشتراكات برامج" in msg.text:
+                await forward_or_send_custom(msg, "الرسالة الثانية (الاشتراكات)")
+                found = True
+                break
+        
+        if not found:
+            print("❌ لم يتم العثور على رسالة 'اشتراكات برامج' في الرسائل المحفوظة!")
+
+        print(f"سيتكرر إرسال الرسالة الثانية بعد {HOURS_MESSAGE_2} ساعة (ساعتين ونصف).")
+        await asyncio.sleep(int(HOURS_MESSAGE_2 * 3600))
 
 
 async def main():
     await client.connect()
     print("اتصلنا بتلجرام بنجاح!")
     
-    asyncio.create_task(task_send_messages())
+    # تشغيل المهمتين بالتوازي
+    asyncio.create_task(task_message_1())
+    asyncio.create_task(task_message_2())
     
     await asyncio.Event().wait()
 
 
 asyncio.run(main())
+
